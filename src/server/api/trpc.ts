@@ -8,7 +8,8 @@
  */
 
 import { initTRPC, TRPCError } from "@trpc/server";
-import { type NextRequest } from "next/server";
+import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { type Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -24,7 +25,7 @@ import { db } from "~/server/db";
  */
 
 interface CreateContextOptions {
-  headers: Headers;
+  session: Session | null;
 }
 
 /**
@@ -37,12 +38,9 @@ interface CreateContextOptions {
  *
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
-export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
-  const session = await getServerAuthSession();
-
+const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
-    session,
-    headers: opts.headers,
+    session: opts.session,
     db,
   };
 };
@@ -53,11 +51,14 @@ export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: { req: NextRequest }) => {
-  // Fetch stuff that depends on the request
+export const createTRPCContext = async (opts: CreateNextContextOptions) => {
+  const { req, res } = opts;
 
-  return await createInnerTRPCContext({
-    headers: opts.req.headers,
+  // Get the session from the server using the getServerSession wrapper function
+  const session = await getServerAuthSession({ req, res });
+
+  return createInnerTRPCContext({
+    session,
   });
 };
 
@@ -108,7 +109,7 @@ export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+  if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
