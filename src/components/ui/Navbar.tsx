@@ -14,20 +14,23 @@ import {
 import { Avatar, AvatarFallback } from './avatar'
 import { AvatarImage } from '@radix-ui/react-avatar'
 import Link from 'next/link'
+import { signIn, signOut, useSession } from 'next-auth/react'
 
 export const Navbar = () => {
+  const { data: sessionData } = useSession()
+
   return (
-    <NavigationMenu>
+    <NavigationMenu className="min-w-full px-2 py-2 gap-0 max-h-16 top-0 justify-between">
       <NavigationMenuList>
         <NavigationMenuItem>
-          <Link href={'/'}>
+          <Link href={'/'} legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               Dashboard
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href={'/about'}>
+          <Link href={'/about'} legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               About
             </NavigationMenuLink>
@@ -43,7 +46,11 @@ export const Navbar = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem>My profile</DropdownMenuItem>
-          <DropdownMenuItem>Log in/log out</DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={sessionData ? () => void signOut() : () => void signIn()}
+          >
+            {sessionData ? 'Log out' : 'Log in'}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </NavigationMenu>
