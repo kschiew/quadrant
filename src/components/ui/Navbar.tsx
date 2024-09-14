@@ -23,7 +23,7 @@ export const Navbar = () => {
     <NavigationMenu className="min-w-full px-2 py-2 gap-0 max-h-16 top-0 justify-between">
       <NavigationMenuList>
         <NavigationMenuItem>
-          <Link href={'/'} legacyBehavior passHref>
+          <Link href={'/dashboard'} legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               Dashboard
             </NavigationMenuLink>
