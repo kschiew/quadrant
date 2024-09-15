@@ -56,6 +56,7 @@ export const users = createTable('user', {
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  roles: many(roles),
 }))
 
 export const accounts = createTable(
@@ -128,3 +129,21 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   }),
 )
+
+export const roles = createTable('role', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }),
+  userId: varchar('user_id', { length: 255 })
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(
+    () => new Date(),
+  ),
+})
+
+export const rolesRelations = relations(roles, ({ one }) => ({
+  user: one(users, { fields: [roles.userId], references: [users.id] }),
+}))

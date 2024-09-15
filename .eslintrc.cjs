@@ -27,6 +27,8 @@ const config = {
       'error',
       {
         argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
       },
     ],
     '@typescript-eslint/require-await': 'off',
